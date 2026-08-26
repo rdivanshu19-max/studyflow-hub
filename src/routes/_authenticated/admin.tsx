@@ -1,0 +1,4 @@
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import { AdminView } from "@/components/app/LibraryViews";
+export const Route = createFileRoute("/_authenticated/admin")({ beforeLoad: async ({ context }) => { const { data } = await supabase.from("user_roles").select("role").eq("user_id", context.user.id).eq("role", "admin").maybeSingle(); if (!data) throw redirect({ to: "/home" }); }, head: () => ({ meta: [{ title: "Admin | BookFlux" }, { name: "description", content: "BookFlux catalogue and content administration." }, { property: "og:title", content: "BookFlux Admin" }, { property: "og:description", content: "Manage the BookFlux digital library." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: AdminView });

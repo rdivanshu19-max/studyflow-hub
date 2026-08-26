@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ExploreView } from "@/components/app/LibraryViews";
+export const Route = createFileRoute("/_authenticated/explore")({ head: () => ({ meta: [{ title: "Explore Books | BookFlux" }, { name: "description", content: "Explore digital study books for JEE, NEET, Boards and competitive exams." }, { property: "og:title", content: "Explore BookFlux Library" }, { property: "og:description", content: "Search digital textbooks, modules and question banks." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: ExploreView });
