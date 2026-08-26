@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { BookPassView } from "@/components/app/LibraryViews";
+export const Route = createFileRoute("/_authenticated/book-pass")({ head: () => ({ meta: [{ title: "JEE Book Pass | BookFlux" }, { name: "description", content: "Unlock a complete JEE digital book library with one BookFlux Pass." }, { property: "og:title", content: "BookFlux JEE Digital Books Pass" }, { property: "og:description", content: "One pass for NCERTs, modules, notes and question banks." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: BookPassView });

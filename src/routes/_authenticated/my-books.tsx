@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { MyBooksView } from "@/components/app/LibraryViews";
+export const Route = createFileRoute("/_authenticated/my-books")({ head: () => ({ meta: [{ title: "My Books | BookFlux" }, { name: "description", content: "Your saved BookFlux digital study library." }, { property: "og:title", content: "My BookFlux Library" }, { property: "og:description", content: "Access your saved study books and reading progress." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: MyBooksView });

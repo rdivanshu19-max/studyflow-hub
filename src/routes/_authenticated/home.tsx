@@ -1,0 +1,3 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { HomeView } from "@/components/app/LibraryViews";
+export const Route = createFileRoute("/_authenticated/home")({ head: () => ({ meta: [{ title: "Home | BookFlux by Rankers" }, { name: "description", content: "Your personalised BookFlux study library and reading progress." }, { property: "og:title", content: "BookFlux Student Home" }, { property: "og:description", content: "Continue reading and discover books selected for your studies." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: HomeView });
