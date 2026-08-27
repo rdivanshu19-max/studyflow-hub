@@ -226,6 +226,54 @@ export type Database = {
           },
         ]
       }
+      highlights: {
+        Row: {
+          book_id: string
+          chapter_id: string | null
+          color: string
+          created_at: string
+          id: string
+          note: string
+          quote: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          chapter_id?: string | null
+          color?: string
+          created_at?: string
+          id?: string
+          note?: string
+          quote?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string | null
+          color?: string
+          created_at?: string
+          id?: string
+          note?: string
+          quote?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "highlights_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "highlights_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_items: {
         Row: {
           added_at: string
@@ -465,6 +513,44 @@ export type Database = {
           },
         ]
       }
+      user_passes: {
+        Row: {
+          activated_at: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          pass_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          pass_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          pass_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_passes_pass_id_fkey"
+            columns: ["pass_id"]
+            isOneToOne: false
+            referencedRelation: "passes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -491,6 +577,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_pass: { Args: { p_pass_id: string }; Returns: undefined }
       bootstrap_profile: {
         Args: {
           p_category: string
