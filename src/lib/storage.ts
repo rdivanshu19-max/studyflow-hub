@@ -12,7 +12,7 @@ export async function uploadBookAsset(file: File, folder: string) {
   const path = `${folder}/${Date.now()}-${safeName(file.name)}`;
   const { error } = await supabase.storage.from(BOOK_BUCKET).upload(path, file, {
     upsert: false,
-    contentType: file.type || undefined,
+    ...(file.type ? { contentType: file.type } : {}),
   });
   if (error) throw error;
   return path;
@@ -27,10 +27,14 @@ export async function uploadVoiceNote(userId: string, blob: Blob) {
   return path;
 }
 
-/** Storage paths are stored raw; resolve them to a temporary readable URL. */
+/**
+ * Values can be absolute URLs, app-served asset paths (/__l5e/...) or
+ * private storage paths. Only storage paths need a signed URL.
+ */
 export async function resolveUrl(value?: string | null, bucket: string = BOOK_BUCKET) {
   if (!value) return null;
-  if (/^https?:\/\//.test(value)) return value;
+  if (/^(https?:|data:|blob:)/.test(value)) return value;
+  if (value.startsWith("/")) return value;
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(value, 60 * 60);
   if (error) return null;
   return data.signedUrl;
