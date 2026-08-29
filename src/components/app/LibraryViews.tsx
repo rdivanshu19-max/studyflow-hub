@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { booksQuery, fetchBook, fetchBooks, fetchChapters, fetchLibrary, fetchPasses, inr, uniqueSorted, type Book } from "@/lib/catalog";
+import { activatePass, booksQuery, fetchBook, fetchBooks, fetchChapters, fetchLibrary, fetchMyPasses, fetchPassBooks, fetchPasses, inr, uniqueSorted, type Book, type Pass } from "@/lib/catalog";
 import { useProfile, useSession } from "@/hooks/useAuth";
 
 export function PassBanner({ compact = false }: { compact?: boolean }) {
