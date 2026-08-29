@@ -88,13 +88,15 @@ function AuthPage() {
     });
     if (error) {
       setBusy(false);
-      return toast.error(error.message);
+      toast.error(error.message);
+      return;
     }
     if (!data.session) {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
         setBusy(false);
-        return toast.error(signInError.message);
+        toast.error(signInError.message);
+        return;
       }
     }
     await bootstrap();
