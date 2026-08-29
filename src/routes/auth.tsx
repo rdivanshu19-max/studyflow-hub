@@ -65,15 +65,22 @@ function AuthPage() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Welcome back");
     navigate({ to: "/home", replace: true });
   }
 
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
-    if (!fullName.trim() || !username.trim()) return toast.error("Name and username are required");
+    if (!fullName.trim() || !username.trim()) {
+      toast.error("Name and username are required");
+      return;
+    }
     setBusy(true);
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
