@@ -71,9 +71,119 @@ export function MyBooksView() {
 function EmptyLibrary() { return <div className="border border-dashed border-border bg-card px-5 py-14 text-center"><Library className="mx-auto h-9 w-9 text-muted-foreground" /><h2 className="mt-3 font-semibold">Your library is ready</h2><p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">Add any free book or unlock a complete Book Pass.</p><Button asChild className="mt-5"><Link to="/explore">Explore books</Link></Button></div>; }
 
 export function BookPassView() {
-  const { data: books = [] } = useQuery(booksQuery); const { data: passes = [] } = useQuery({ queryKey: ["passes"], queryFn: fetchPasses }); const pass = passes[0];
-  return <div className="space-y-8"><section className="pass-banner min-h-80 border border-banner-border bg-banner p-6 text-center text-banner-foreground md:p-10"><div className="relative z-10 mx-auto max-w-2xl"><p className="text-xs font-bold uppercase text-pass-accent">Complete JEE Library</p><h1 className="mt-3 text-3xl font-bold md:text-5xl">{pass?.title || "Digital Books Pass"}</h1><p className="mt-3 text-banner-muted">21 books · One year · Unlimited learning</p><div className="mx-auto mt-7 grid max-w-md grid-cols-2 border border-banner-border bg-banner-soft p-4"><div><p className="text-xs text-banner-muted">Without pass</p><p className="mt-1 text-xl text-banner-muted line-through">₹5,334</p></div><div className="border-l border-banner-border"><p className="text-xs text-pass-accent">With pass</p><p className="mt-1 text-3xl font-bold text-pass-accent">{inr(Number(pass?.price || 1999))}</p></div></div><Button className="mt-6 w-full max-w-md bg-pass-accent text-pass-accent-foreground hover:bg-pass-accent/90" onClick={() => toast.success("Your Book Pass request has been saved")}>Get all 21 digital books</Button></div><div className="pass-grid absolute inset-0 opacity-30" /></section><section><SectionHead title="What you'll get" /><BookGrid books={books.filter((b) => b.exams.some((e) => e.includes("JEE"))).slice(0, 18)} /></section></div>;
+  const queryClient = useQueryClient();
+  const { session } = useSession();
+  const { data: passes = [] } = useQuery({ queryKey: ["passes"], queryFn: fetchPasses });
+  const { data: myPasses = [] } = useQuery({
+    queryKey: ["my-passes", session?.user.id],
+    enabled: !!session,
+    queryFn: () => (session ? fetchMyPasses(session.user.id) : Promise.resolve([])),
+  });
+  const activate = useMutation({
+    mutationFn: async (passId: string) => {
+      if (!session) throw new Error("Please sign in");
+      await activatePass(passId);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["my-passes"] });
+      await queryClient.invalidateQueries({ queryKey: ["library"] });
+      toast.success("Pass activated — books added to My Books");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-10">
+      <div>
+        <h1 className="page-title">Book Passes</h1>
+        <p className="text-sm text-muted-foreground">
+          Activate a pass to unlock every book inside it for the full validity period.
+        </p>
+      </div>
+      {passes.map((pass) => (
+        <PassCard
+          key={pass.id}
+          pass={pass as unknown as Pass}
+          owned={myPasses.some((p) => p.pass_id === pass.id)}
+          busy={activate.isPending}
+          onActivate={() => activate.mutate(pass.id)}
+        />
+      ))}
+      {passes.length === 0 && (
+        <p className="border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+          No passes are published yet.
+        </p>
+      )}
+    </div>
+  );
 }
+
+function PassCard({
+  pass,
+  owned,
+  busy,
+  onActivate,
+}: {
+  pass: Pass;
+  owned: boolean;
+  busy: boolean;
+  onActivate: () => void;
+}) {
+  const { data: passBooks = [] } = useQuery({
+    queryKey: ["pass-books", pass.id],
+    queryFn: () => fetchPassBooks(pass.id),
+  });
+  return (
+    <section className="space-y-5">
+      <div className="pass-banner relative overflow-hidden border border-banner-border bg-banner p-6 text-center text-banner-foreground md:p-10">
+        <div className="relative z-10 mx-auto max-w-2xl">
+          <p className="text-xs font-bold uppercase text-pass-accent">
+            {pass.exam || "Complete library"}
+          </p>
+          <h2 className="mt-3 text-3xl font-bold md:text-5xl">{pass.title}</h2>
+          <p className="mt-3 text-banner-muted">
+            {passBooks.length} books · {pass.validity_months || 12} months · Unlimited learning
+          </p>
+          <div className="mx-auto mt-7 grid max-w-md grid-cols-2 border border-banner-border bg-banner-soft p-4">
+            <div>
+              <p className="text-xs text-banner-muted">Without pass</p>
+              <p className="mt-1 text-xl text-banner-muted line-through">
+                {inr(Number(pass.original_price || 0))}
+              </p>
+            </div>
+            <div className="border-l border-banner-border">
+              <p className="text-xs text-pass-accent">With pass</p>
+              <p className="mt-1 text-3xl font-bold text-pass-accent">
+                {pass.is_free ? "Free" : inr(Number(pass.price))}
+              </p>
+            </div>
+          </div>
+          <Button
+            className="mt-6 w-full max-w-md bg-pass-accent text-pass-accent-foreground hover:bg-pass-accent/90"
+            disabled={owned || busy}
+            onClick={onActivate}
+          >
+            {owned ? (
+              <>
+                <Check /> Pass active
+              </>
+            ) : (
+              <>
+                <Ticket /> {pass.is_free ? "Activate free pass" : `Unlock for ${inr(Number(pass.price))}`}
+              </>
+            )}
+          </Button>
+        </div>
+        <div className="pass-grid absolute inset-0 opacity-30" />
+      </div>
+      <div>
+        <SectionHead title="Books included" />
+        <BookGrid books={passBooks.map((pb) => pb.books)} />
+      </div>
+    </section>
+  );
+}
+
 
 export function BookDetailView({ bookId }: { bookId: string }) {
   const queryClient = useQueryClient(); const { session } = useSession();
