@@ -37,7 +37,13 @@ const COLORS = [
   { key: "pink", className: "bg-[oklch(0.9_0.1_5)]" },
 ];
 
-export function ReaderView({ bookId, chapterId }: { bookId: string; chapterId?: string }) {
+export function ReaderView({
+  bookId,
+  chapterId,
+}: {
+  bookId: string;
+  chapterId?: string | undefined;
+}) {
   const { session } = useSession();
   const queryClient = useQueryClient();
   const userId = session?.user.id;
@@ -171,8 +177,12 @@ export function ReaderView({ bookId, chapterId }: { bookId: string; chapterId?: 
   });
 
   async function bookmark() {
-    if (!userId) return toast.error("Please sign in");
+    if (!userId) {
+      toast.error("Please sign in");
+      return;
+    }
     const { error } = await supabase.from("bookmarks").insert({
+
       user_id: userId,
       book_id: bookId,
       chapter_id: selectedId,
