@@ -177,8 +177,12 @@ export function ReaderView({
   });
 
   async function bookmark() {
-    if (!userId) return toast.error("Please sign in");
+    if (!userId) {
+      toast.error("Please sign in");
+      return;
+    }
     const { error } = await supabase.from("bookmarks").insert({
+
       user_id: userId,
       book_id: bookId,
       chapter_id: selectedId,
